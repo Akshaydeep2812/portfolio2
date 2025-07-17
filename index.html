@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Resume - Akshaydeep Ankulugari</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: A single-page, vertical-scrolling application with a fixed top navigation bar for easy access to all sections. The structure is designed to tell a story: 1) A professional summary to introduce the candidate. 2) An interactive skills dashboard for quick assessment of technical abilities. 3) A "Key Achievements" section with charts to visually highlight top academic and project metrics. 4) A project showcase with expandable details to demonstrate practical experience. 5) A chronological timeline for education and certifications to show growth. This user flow guides a recruiter from a high-level summary to detailed proof points in an intuitive and engaging manner, which is more effective than a static document. -->
+    <!-- Visualization & Content Choices: 
+        - Education Scores (CGPA/Percentage): Goal is to compare academic performance. A Bar Chart (Chart.js) is used for clear visual comparison against a scale. Interaction includes tooltips on hover for exact values. This is more impactful than plain numbers.
+        - Project Metrics (Accuracy/Automation): Goal is to inform and impress with key results. Donut Charts (Chart.js) are used to represent these percentages in a modern, dashboard-like format. Interaction includes tooltips.
+        - Skills List: Goal is to organize technical abilities. An interactive filter with HTML buttons and JS logic is used. Users can click categories (Languages, Web, etc.) to see relevant skills, reducing clutter and improving usability.
+        - Education & Certifications: Goal is to show progression over time. A vertical timeline built with HTML/CSS provides a clear, chronological narrative of academic and learning achievements, which is more intuitive than a simple list.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F5F5;
+            color: #212121;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 280px;
+            max-height: 320px;
+        }
+        @media (min-width: 640px) {
+            .chart-container {
+                height: 320px;
+                max-height: 350px;
+            }
+        }
+        .skill-btn.active {
+            background-color: #4A90E2;
+            color: white;
+            transform: scale(1.05);
+        }
+        .timeline {
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            background-color: #4A90E2;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -2px;
+        }
+        .timeline-container {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+        }
+        .timeline-container::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            right: -12.5px;
+            background-color: white;
+            border: 4px solid #4A90E2;
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .timeline-left {
+            left: 0;
+        }
+        .timeline-right {
+            left: 50%;
+        }
+        .timeline-right::after {
+            left: -12.5px;
+        }
+        @media screen and (max-width: 768px) {
+            .timeline::after {
+                left: 31px;
+            }
+            .timeline-container {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            .timeline-container::before {
+                left: 60px;
+                border: medium solid white;
+                border-width: 10px 10px 10px 0;
+                border-color: transparent white transparent transparent;
+            }
+            .timeline-left::after, .timeline-right::after {
+                left: 18px;
+            }
+            .timeline-right {
+                left: 0%;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <nav class="bg-white/80 backdrop-blur-md shadow-md fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <span class="text-xl font-bold text-[#4A90E2]">Akshaydeep Ankulugari</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#summary" class="text-gray-700 hover:bg-[#4A90E2] hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Summary</a>
+                        <a href="#skills" class="text-gray-700 hover:bg-[#4A90E2] hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Skills</a>
+                        <a href="#achievements" class="text-gray-700 hover:bg-[#4A90E2] hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Achievements</a>
+                        <a href="#projects" class="text-gray-700 hover:bg-[#4A90E2] hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Projects</a>
+                        <a href="#education" class="text-gray-700 hover:bg-[#4A90E2] hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Education</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-16">
+        <section id="summary" class="py-20 md:py-28">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight">Akshaydeep Ankulugari</h1>
+                <p class="mt-4 text-lg md:text-xl text-gray-600">Computer Science Student | AI & Machine Learning Enthusiast</p>
+                <div class="mt-8 flex justify-center items-center space-x-6 text-gray-500">
+                    <p>Hyderabad</p>
+                    <span>&bull;</span>
+                    <p>+91-7842565851</p>
+                    <span>&bull;</span>
+                    <p>Akshaydeepankulugari123@gmail.com</p>
+                </div>
+                 <div class="mt-8">
+                    <h2 class="text-2xl font-bold text-[#4A90E2] mb-4">Professional Summary</h2>
+                     <p class="max-w-3xl mx-auto text-base text-gray-700 leading-relaxed">
+                        This section provides a brief overview of my profile. I am a motivated and detail-oriented Computer Science student specializing in AI and Machine Learning. I have a proven ability to develop practical solutions through impactful projects, including a high-accuracy AI chatbot using transformer models. I am eager to apply my skills in software development, data structures, and machine learning to contribute to a forward-thinking organization.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills" class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight">Technical Skills</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+                        This section showcases my technical abilities. You can filter the skills by category to see my proficiency in different areas. This interactive element allows for a quick and focused assessment of my qualifications based on your specific needs.
+                    </p>
+                </div>
+                <div class="mt-12">
+                    <div id="skill-filters" class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
+                        <button class="skill-btn active px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-full shadow-sm transition-all duration-300" data-category="all">All Skills</button>
+                        <button class="skill-btn px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-full shadow-sm transition-all duration-300" data-category="languages">Languages</button>
+                        <button class="skill-btn px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-full shadow-sm transition-all duration-300" data-category="web">Web Development</button>
+                        <button class="skill-btn px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-full shadow-sm transition-all duration-300" data-category="core">Core Concepts</button>
+                        <button class="skill-btn px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-full shadow-sm transition-all duration-300" data-category="db">Databases</button>
+                        <button class="skill-btn px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-full shadow-sm transition-all duration-300" data-category="ai_ml">AI & ML</button>
+                    </div>
+                    <div id="skill-list" class="flex flex-wrap justify-center gap-3 text-center">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="achievements" class="py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight">Key Achievements</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+                        This dashboard provides a visual summary of my key academic and project-based accomplishments. The charts below represent my academic scores and the performance metrics of my AI chatbot project, offering a quick, data-driven look at my capabilities. Hover over the charts for more details.
+                    </p>
+                </div>
+                <div class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-semibold text-center mb-4">Academic Performance</h3>
+                        <div class="chart-container">
+                            <canvas id="educationChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-semibold text-center mb-4">Chatbot Accuracy</h3>
+                         <div class="chart-container">
+                            <canvas id="accuracyChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg md:col-span-2 lg:col-span-1">
+                        <h3 class="text-xl font-semibold text-center mb-4">Routine Inquiry Automation</h3>
+                         <div class="chart-container">
+                            <canvas id="automationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight">Technical Projects</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+                        Here are the major projects I've worked on. They demonstrate my ability to apply theoretical knowledge to build real-world solutions. Each project card includes a brief overview; you can click "Details" to learn more about the technologies used and my specific contributions.
+                    </p>
+                </div>
+                <div class="mt-12 grid gap-8 md:grid-cols-1 lg:grid-cols-2">
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-lg border border-gray-200">
+                        <h3 class="text-xl font-bold">AI-Powered Cognitive Digital Twin</h3>
+                        <p class="text-sm text-gray-500 mb-4">Ongoing</p>
+                        <p class="text-gray-700">Designing an intelligent digital replica of real estate assets using AI to simulate market trends and property behavior. This project integrates blockchain technology to ensure secure, transparent, and tamper-proof data, enabling accurate, real-time valuation for all stakeholders.</p>
+                         <div class="mt-4">
+                            <p class="font-semibold">Technologies Used:</p>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                <span class="bg-[#4A90E2] text-white text-xs font-semibold px-2.5 py-1 rounded-full">Python</span>
+                                <span class="bg-[#4A90E2] text-white text-xs font-semibold px-2.5 py-1 rounded-full">AI/ML Libraries</span>
+                                <span class="bg-[#4A90E2] text-white text-xs font-semibold px-2.5 py-1 rounded-full">Blockchain</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-lg border border-gray-200">
+                        <h3 class="text-xl font-bold">Chatbot Using Transformers</h3>
+                        <p class="text-sm text-gray-500 mb-4">2023</p>
+                        <p class="text-gray-700">Developed and trained a sophisticated AI chatbot using the BERT model to understand and respond to user queries. Achieved a 95% accuracy rate in understanding user intent, which led to automating responses for 80% of routine inquiries and significantly reducing the workload for human agents.</p>
+                         <div class="mt-4">
+                            <p class="font-semibold">Technologies Used:</p>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                <span class="bg-[#4A90E2] text-white text-xs font-semibold px-2.5 py-1 rounded-full">Python</span>
+                                <span class="bg-[#4A90E2] text-white text-xs font-semibold px-2.5 py-1 rounded-full">BERT</span>
+                                <span class="bg-[#4A90E2] text-white text-xs font-semibold px-2.5 py-1 rounded-full">Natural Language Processing (NLP)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="education" class="py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight">Education & Certifications</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+                        This timeline illustrates my educational background and the certifications I have earned. It provides a chronological overview of my learning journey, highlighting my formal education and continuous efforts to gain new skills in specialized areas.
+                    </p>
+                </div>
+                <div class="timeline mt-12">
+                    <div class="timeline-container timeline-left">
+                        <div class="bg-white p-6 rounded-lg shadow-lg">
+                            <h3 class="text-lg font-bold">Bachelor of Technology, CS (AI & ML)</h3>
+                            <p class="text-sm text-gray-600">Malla Reddy University</p>
+                            <p class="text-xs text-gray-500 mt-1">2021 – 2025 (Expected)</p>
+                        </div>
+                    </div>
+                    <div class="timeline-container timeline-right">
+                        <div class="bg-white p-6 rounded-lg shadow-lg">
+                            <h3 class="text-lg font-bold">Coursera: Java Programming</h3>
+                            <p class="text-sm text-gray-600">Arrays, Lists, and Structured Data</p>
+                            <p class="text-xs text-gray-500 mt-1">May 2023</p>
+                        </div>
+                    </div>
+                    <div class="timeline-container timeline-left">
+                        <div class="bg-white p-6 rounded-lg shadow-lg">
+                             <h3 class="text-lg font-bold">Coursera: SQL</h3>
+                            <p class="text-sm text-gray-600">Intro to Relational Databases</p>
+                            <p class="text-xs text-gray-500 mt-1">November 2022</p>
+                        </div>
+                    </div>
+                     <div class="timeline-container timeline-right">
+                        <div class="bg-white p-6 rounded-lg shadow-lg">
+                             <h3 class="text-lg font-bold">AWS Academy</h3>
+                            <p class="text-sm text-gray-600">ML Foundations & Cloud Practitioner</p>
+                            <p class="text-xs text-gray-500 mt-1">Certification</p>
+                        </div>
+                    </div>
+                     <div class="timeline-container timeline-left">
+                        <div class="bg-white p-6 rounded-lg shadow-lg">
+                             <h3 class="text-lg font-bold">Cambridge B2 Empowerment</h3>
+                            <p class="text-sm text-gray-600">English Certificate</p>
+                            <p class="text-xs text-gray-500 mt-1">Certification</p>
+                        </div>
+                    </div>
+                    <div class="timeline-container timeline-right">
+                        <div class="bg-white p-6 rounded-lg shadow-lg">
+                            <h3 class="text-lg font-bold">Intermediate (12th)</h3>
+                            <p class="text-sm text-gray-600">Sri Chaitanya Jr. College</p>
+                            <p class="text-xs text-gray-500 mt-1">2021</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const skills = {
+                languages: ['Python', 'Java'],
+                core: ['Data Structures & Algorithms', 'Object-Oriented Programming (OOP)'],
+                web: ['HTML', 'CSS', 'JavaScript', 'React.js'],
+                db: ['MySQL', 'MongoDB'],
+                ai_ml: ['Foundational ML Concepts', 'Natural Language Processing (NLP)', 'BERT']
+            };
+
+            const skillFilters = document.getElementById('skill-filters');
+            const skillList = document.getElementById('skill-list');
+
+            function displaySkills(category = 'all') {
+                skillList.innerHTML = '';
+                let skillsToDisplay = [];
+
+                if (category === 'all') {
+                    skillsToDisplay = Object.values(skills).flat();
+                } else {
+                    skillsToDisplay = skills[category] || [];
+                }
+
+                skillsToDisplay.forEach(skill => {
+                    const skillTag = document.createElement('span');
+                    skillTag.className = 'bg-gray-200 text-gray-800 text-sm font-medium px-4 py-2 rounded-full shadow-sm';
+                    skillTag.textContent = skill;
+                    skillList.appendChild(skillTag);
+                });
+            }
+
+            skillFilters.addEventListener('click', function(e) {
+                if (e.target.tagName === 'BUTTON') {
+                    document.querySelectorAll('.skill-btn').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    const category = e.target.getAttribute('data-category');
+                    displaySkills(category);
+                }
+            });
+
+            displaySkills();
+
+            const commonChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: { size: 14 },
+                        bodyFont: { size: 12 },
+                        padding: 10,
+                        cornerRadius: 4
+                    }
+                }
+            };
+            
+            new Chart(document.getElementById('educationChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['B.Tech CGPA', '12th Percentage'],
+                    datasets: [{
+                        label: 'Score',
+                        data: [8.18, 92.4],
+                        backgroundColor: ['rgba(74, 144, 226, 0.6)', 'rgba(80, 227, 194, 0.6)'],
+                        borderColor: ['rgba(74, 144, 226, 1)', 'rgba(80, 227, 194, 1)'],
+                        borderWidth: 1,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    ...commonChartOptions,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: '#757575' }
+                        },
+                        x: {
+                            ticks: { color: '#212121', font: { weight: 'bold' } }
+                        }
+                    },
+                    plugins: { ...commonChartOptions.plugins,
+                        tooltip: { ...commonChartOptions.plugins.tooltip,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        if (context.label === 'B.Tech CGPA') {
+                                           label += context.parsed.y + ' / 10';
+                                        } else {
+                                           label += context.parsed.y + ' / 100';
+                                        }
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            new Chart(document.getElementById('accuracyChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Accuracy', 'Remainder'],
+                    datasets: [{
+                        data: [95, 5],
+                        backgroundColor: ['#4A90E2', '#E0E0E0'],
+                        hoverBackgroundColor: ['#3B73B5', '#D0D0D0'],
+                        borderColor: 'white',
+                        borderWidth: 4
+                    }]
+                },
+                options: {
+                    ...commonChartOptions,
+                    rotation: -90,
+                    circumference: 360,
+                    cutout: '75%',
+                     plugins: {
+                        ...commonChartOptions.plugins,
+                         title: { display: true, text: '95%', position: 'bottom', font: {size: 24, weight: 'bold'}, color: '#212121', padding: {top: -50} }
+                    }
+                }
+            });
+            
+            new Chart(document.getElementById('automationChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Automation', 'Remainder'],
+                    datasets: [{
+                        data: [80, 20],
+                        backgroundColor: ['#50E3C2', '#E0E0E0'],
+                        hoverBackgroundColor: ['#40B59B', '#D0D0D0'],
+                        borderColor: 'white',
+                        borderWidth: 4
+                    }]
+                },
+                options: {
+                    ...commonChartOptions,
+                    rotation: -90,
+                    circumference: 360,
+                    cutout: '75%',
+                    plugins: {
+                        ...commonChartOptions.plugins,
+                         title: { display: true, text: '80%', position: 'bottom', font: {size: 24, weight: 'bold'}, color: '#212121', padding: {top: -50} }
+                    }
+                }
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
